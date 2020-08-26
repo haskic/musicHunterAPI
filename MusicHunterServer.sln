@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicHunterServer", "MusicHunterServer\MusicHunterServer.csproj", "{683097E1-3F62-466B-A35B-9DA77743A890}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{683097E1-3F62-466B-A35B-9DA77743A890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{683097E1-3F62-466B-A35B-9DA77743A890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{683097E1-3F62-466B-A35B-9DA77743A890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{683097E1-3F62-466B-A35B-9DA77743A890}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {51A704B4-9DE8-4777-A7AB-F6C7B39B02D7}
+	EndGlobalSection
+EndGlobal
