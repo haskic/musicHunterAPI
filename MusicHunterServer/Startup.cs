@@ -78,7 +78,10 @@ namespace MusicHunterServer
             //});
 
 
-            services.AddSignalR();
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
 
             services.AddControllers();
         }
@@ -105,6 +108,7 @@ namespace MusicHunterServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotificationsController>("/notifications");
+                endpoints.MapHub<MessengerController>("/messenger");
                 endpoints.MapControllers();
             });
         }

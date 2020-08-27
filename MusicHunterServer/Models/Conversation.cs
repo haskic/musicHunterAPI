@@ -7,7 +7,8 @@ namespace MusicHunterServer.Models
 {
     public class Conversation
     {
-        public int ConversationId { get; set; }
+        
+        public int Id { get; set; }
         public string Title { get; set; }
         public string CreatorHash { get; set; }
         public DateTime CreatedAt { get; set; }

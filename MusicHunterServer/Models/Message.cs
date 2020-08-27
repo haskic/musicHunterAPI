@@ -9,7 +9,7 @@ namespace MusicHunterServer.Models
     {
         public int Id { get; set; }
         public int ConversationId { get; set; }
-        public int SenderHash { get; set; }
+        public string SenderHash { get; set; }
         public DateTime CreatedAt { get; set; }
         public string MessageType { get; set; }
         public string Attachment1 { get; set; }
