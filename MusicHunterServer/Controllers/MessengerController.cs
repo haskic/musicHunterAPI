@@ -64,13 +64,13 @@ namespace MusicHunterServer.Controllers
             }
 
         }
-        public async Task SendMessage(string hashSender,string hashReciver,string textMessage)
+        public async Task SendMessage(string hashSender,string hashReciver,Message message)
         {
-            Message message = new Message();
+            //Message message = new Message();
             message.CreatedAt = DateTime.Now;
-            message.Text = textMessage;
+            //message.Text = textMessage;
             message.SenderHash = hashSender;
-
+            _logger.LogInformation("TestMessage.Text = " + message.Text);
             var userReceiver = Users.FirstOrDefault(user => user.Hash == hashReciver);
             if (message.ConversationId == 0)
             {
@@ -110,14 +110,16 @@ namespace MusicHunterServer.Controllers
                     _dbContext.Messages.Add(message);
                     await _dbContext.SaveChangesAsync();
                 }
-                await Clients.All.SendAsync("GetMessage", textMessage);
+                _logger.LogInformation("Message was send info: |Conversation was not founded in received message obj but was founded in DataBase|");
+                await Clients.All.SendAsync("GetMessage", new { Text = message.Text, HashSender = hashSender});
             }
             else
             {
                 _dbContext.Messages.Add(message);
                 await _dbContext.SaveChangesAsync();
                 _logger.LogWarning("ConversationId was founded in body of request and message was sent!");
-                await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", textMessage);
+                await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", message.Text);
+                _logger.LogInformation("Message was send info: |Conversation was founded in received message|");
 
             }
             //_dbContext.ConversationRelations.FirstOrDefault(item => item.)
@@ -125,9 +127,11 @@ namespace MusicHunterServer.Controllers
             if (userReceiver != null)
             {
                 //await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", message);
-                await Clients.Client(userReceiver.ConnectionId).SendAsync("GetNotification", message);
-                await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", textMessage);
-                _logger.LogWarning("NOtification to UserReceiver with connectionId = " + userReceiver.ConnectionId + " was sent");
+                //await Clients.Client(userReceiver.ConnectionId).SendAsync("GetNotification", message);
+                await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", new { Text = message.Text, HashSender = hashSender });
+                _logger.LogWarning("Notification to UserReceiver with connectionId = " + userReceiver.ConnectionId + " was sent");
+                _logger.LogInformation("Message was send info: |Receiver user was Online on Zhakar servers.|");
+
             }
 
         }
