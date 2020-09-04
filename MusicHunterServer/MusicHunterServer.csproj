@@ -17,5 +17,14 @@
     <Folder Include="images\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="AudioGistogrammer">
+      <HintPath>dependecies\AudioGistogrammer.dll</HintPath>
+    </Reference>
+    <Reference Include="NAudio">
+      <HintPath>dependecies\NAudio.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 
 </Project>

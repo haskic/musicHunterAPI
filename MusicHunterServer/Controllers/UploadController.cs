@@ -14,7 +14,7 @@ using MusicHunterServer.Data;
 using MusicHunterServer.Models;
 using MusicHunterServer.Utils;
 using Newtonsoft.Json;
-
+using AudioGistogrammer;
 
 
 namespace MusicHunterServer.Controllers
@@ -56,6 +56,11 @@ namespace MusicHunterServer.Controllers
                     {
                         await formFile.CopyToAsync(stream);
                     }
+                    Gistogrammer trackHistogram = new Gistogrammer(filePath);
+                    trackHistogram.calculateValues(702);
+                    float [] points = trackHistogram.getValuesInPersent();
+                    string jsonPoints = JsonConvert.SerializeObject(new { pointArray = points });
+                    System.IO.File.WriteAllText(Directory.GetCurrentDirectory() + @"\histograms\" + hashString + ".histogram",jsonPoints);
                 }
             }
 
@@ -145,9 +150,6 @@ namespace MusicHunterServer.Controllers
             //_logger.LogWarning("UPLOAD PATH: " + Directory.GetCurrentDirectory() + @"\music");
             return JsonConvert.SerializeObject(new { message = "image file was uploaded", hashUrl = hashString + extension, status = true });
         }
-
-
-
 
     }
 }
