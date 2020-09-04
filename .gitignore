@@ -4,8 +4,8 @@
 *.user
 *.userosscache
 *.sln.docstates
-MusicHunterServer/music
-MusicHunterServer/histograms
+/MusicHunterServer/music
+/MusicHunterServer/histograms
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
