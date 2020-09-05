@@ -17,5 +17,10 @@ namespace MusicHunterServer.Data
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<ConversationRelation> ConversationRelations { get; set; }
         public DbSet<Participant> Participants { get; set; }
+        
+        public DbSet<TrackToUser> TrackUserRelations { get; set; }
+        public DbSet<PlaylistToUser> PlaylistUserRelations{ get; set; }
+
+
     }
 }
