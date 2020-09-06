@@ -57,7 +57,7 @@ namespace MusicHunterServer.Controllers
             }
 
             string tokenString = _tokenManeger.createToken(loginRequest);
-            return JsonConvert.SerializeObject(new { message =  "login successed", token = tokenString });
+            return JsonConvert.SerializeObject(new { message =  "login successed", token = tokenString, userHash = result.Hash });
 
         }
 
@@ -67,7 +67,7 @@ namespace MusicHunterServer.Controllers
         {
             user.CreatedAt = DateTime.Now;
             user.UpdatedAt = DateTime.Now;
-            user.Hash = Hasher.GetHashString(user.Email + user.Password + user.CreatedAt.ToString()); ;
+            user.Hash = Hasher.GetHashString(user.Email + user.CreatedAt.ToString());
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
             return JsonConvert.SerializeObject(new { message = "Registratinos successed", status = true });
@@ -83,14 +83,20 @@ namespace MusicHunterServer.Controllers
             {
                 var result = await GoogleJsonWebSignature.ValidateAsync(token.TokenId);
                 _logger.LogInformation("Google token received with email: " + result.Email);
+                string UserHash = "";
+                var userInDb = _dbContext.Users.Where(user => user.Email == result.Email).FirstOrDefault();
 
-                var isUserInDb = _dbContext.Users.Where(user => user.Email == result.Email).FirstOrDefault();
-
-                if (isUserInDb == null)
+                if (userInDb == null)
                 {
                     User newUser = new User() { Email = result.Email, IsBlocked = false, CreatedAt = DateTime.Now, UpdatedAt = DateTime.Now };
+                    newUser.Hash = Hasher.GetHashString(result.Email + newUser.CreatedAt.ToString());
+                    UserHash = newUser.Hash;
                     _dbContext.Users.Add(newUser);
                     await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    UserHash = userInDb.Hash;
                 }
 
                 AuthenticateRequest authRequest = new AuthenticateRequest()
@@ -98,6 +104,7 @@ namespace MusicHunterServer.Controllers
                     Email = result.Email
                 };
                 tokenString = _tokenManeger.createToken(authRequest);
+                return JsonConvert.SerializeObject(new { message = "Google token obj veryfy successed", status = true, token = tokenString, userHash = UserHash });
 
             }
             catch (Exception e)
@@ -106,7 +113,6 @@ namespace MusicHunterServer.Controllers
                 return JsonConvert.SerializeObject(new { message = "Google token obj validation error", status = false });
 
             }
-            return JsonConvert.SerializeObject(new { message = "Google token obj veryfy successed", status = true, token = tokenString});
         }
 
         [Route("api/testroute")]
