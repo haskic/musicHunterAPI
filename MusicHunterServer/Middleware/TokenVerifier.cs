@@ -27,7 +27,9 @@ namespace MusicHunterServer.Middleware
             {
                 "/api/public",
                 "/messenger",
-                "/notifications"
+                "/notifications",
+                "/images",
+                "/music"
             };
             //---------------------------------------
 
