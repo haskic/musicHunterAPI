@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Apis.Logging;
@@ -52,7 +53,12 @@ namespace MusicHunterServer.Controllers
         {
             _logger.LogInformation($"Get tracks [userHash  = {userHash}]");
             var tracks = _dbContext.Tracks.FromSqlRaw("select T.Id,T.Artist,T.HashUrl,T.ImageUrl,T.Name,T.OwnerId from TrackUserRelations join Tracks as T on TrackHash = T.HashUrl where UserHash like @userHash", new SqlParameter("@userHash", userHash));
-             
+
+            foreach (var track in tracks)
+            {
+                track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
+            }
+
             return JsonConvert.SerializeObject(new { messsage = "Tracks of ", tracks = JsonConvert.SerializeObject(tracks), status = true});
         }
     }

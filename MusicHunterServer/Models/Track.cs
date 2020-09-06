@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ namespace MusicHunterServer.Models
         public string HashUrl { get; set; }
         public int OwnerId { get; set; }
         public string ImageUrl { get; set; }
+        [NotMapped]
+        public string Histogram { get; set; }
 
     }
 }

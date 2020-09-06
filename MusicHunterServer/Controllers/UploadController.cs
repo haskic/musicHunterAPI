@@ -58,7 +58,7 @@ namespace MusicHunterServer.Controllers
                     }
                     Gistogrammer trackHistogram = new Gistogrammer(filePath);
                     trackHistogram.calculateValues(702);
-                    float [] points = trackHistogram.getValuesInPersent();
+                    float [] points = trackHistogram.getValuesInPersent(1);
                     string jsonPoints = JsonConvert.SerializeObject(new { pointArray = points });
                     System.IO.File.WriteAllText(Directory.GetCurrentDirectory() + @"\histograms\" + hashString + ".histogram",jsonPoints);
                 }
