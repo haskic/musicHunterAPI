@@ -42,7 +42,7 @@ namespace MusicHunterServer.Controllers
         {
             foreach (var relation in relations)
             {
-                _logger.LogInformation("Add Ralation between playlistHash: " + relation.PlaylistHash + " && " + " trackHash: " + relation.TrackHashUrl);
+                _logger.LogInformation("Add Relation between playlistHash: " + relation.PlaylistHash + " && " + " trackHash: " + relation.TrackHashUrl);
                 _dbContext.PlaylistRelations.Add(relation);
             }
             await _dbContext.SaveChangesAsync();
@@ -53,7 +53,7 @@ namespace MusicHunterServer.Controllers
         public async Task<string> AddRelation([FromBody] PlaylistRelation relation)
         {
 
-            _logger.LogInformation("Add Ralation between playlistHash: " + relation.PlaylistHash + " && " + " trackHash: " + relation.TrackHashUrl);
+            _logger.LogInformation("Add Relation between playlistHash: " + relation.PlaylistHash + " && " + " trackHash: " + relation.TrackHashUrl);
             _dbContext.PlaylistRelations.Add(relation);
             await _dbContext.SaveChangesAsync();
             return JsonConvert.SerializeObject(new { message = "Relation was saved", status = true });
