@@ -16,7 +16,7 @@ namespace MusicHunterServer.Models
         public string ImageUrl { get; set; }
 
         [NotMapped]
-        public IList<Track> tracks;
+        public IList<Track> Tracks;
 
     }
 }
