@@ -26,7 +26,7 @@ namespace MusicHunterServer
 {
     public class Startup
     {
-        public string connectionString = "Data Source=DESKTOP-G92CTF5;Initial Catalog=musicHunter;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        public string connectionString = "Data Source=DESKTOP-G92CTF5;Initial Catalog=musicHunter;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;MultipleActiveResultSets=true;";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;

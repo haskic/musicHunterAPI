@@ -58,5 +58,6 @@ namespace MusicHunterServer.Controllers
             await _dbContext.SaveChangesAsync();
             return JsonConvert.SerializeObject(new { message = "Relation was saved", status = true });
         }
+
     }
 }
