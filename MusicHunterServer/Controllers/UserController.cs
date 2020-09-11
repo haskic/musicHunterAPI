@@ -78,6 +78,11 @@ namespace MusicHunterServer.Controllers
                 _logger.LogInformation("CUR HASH " + playlist.Hash);
                 var tracks = _dbContext.Tracks.FromSqlRaw("select T.Id,T.Artist,T.HashUrl,T.ImageUrl,T.Name,T.OwnerId from PlaylistRelations as PR join Tracks as T on T.HashUrl = PR.TrackHashUrl where PR.PlaylistHash like @playlistHash;", new SqlParameter("@playlistHash", playlist.Hash));
                 playlist.Tracks = tracks.ToList();
+                foreach (var track in playlist.Tracks)
+                {
+                    track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
+                }
+
 
             }
 
