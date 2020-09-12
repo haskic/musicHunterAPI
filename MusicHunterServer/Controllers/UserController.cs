@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using MusicHunterServer.Data;
 using MusicHunterServer.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace MusicHunterServer.Controllers
 {
@@ -81,6 +82,8 @@ namespace MusicHunterServer.Controllers
                 foreach (var track in playlist.Tracks)
                 {
                     track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
+                    track.HashUrl = "https://localhost:5001/music/" + track.HashUrl;
+                    track.ImageUrl = "https://localhost:5001/images/" + track.ImageUrl;
                 }
 
 
@@ -94,7 +97,16 @@ namespace MusicHunterServer.Controllers
             //    track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
             //}
 
-            return JsonConvert.SerializeObject(new { messsage = "Tracks of ", playlists = JsonConvert.SerializeObject(playlists), status = true });
+            DefaultContractResolver contractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
+
+            return JsonConvert.SerializeObject(new { messsage = "Tracks of ", playlists = JsonConvert.SerializeObject(playlists, new JsonSerializerSettings
+            {
+                ContractResolver = contractResolver,
+                Formatting = Formatting.Indented
+            }), status = true });
         }
     }
 }

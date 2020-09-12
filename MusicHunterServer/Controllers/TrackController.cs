@@ -42,6 +42,7 @@ namespace MusicHunterServer.Controllers
             foreach (var track in tracks)
             {
                 _logger.LogInformation("Add Track REQUEST: " + track.Name);
+                _logger.LogInformation("Image URL of Track = " + track.ImageUrl);
                 _dbContext.Tracks.Add(track);
             }
 
