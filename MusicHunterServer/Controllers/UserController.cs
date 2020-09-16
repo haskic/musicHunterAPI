@@ -36,7 +36,7 @@ namespace MusicHunterServer.Controllers
             _logger.LogInformation($"[TrackToUser controller request] = trackHash: {track.TrackHash}  userHash: {track.UserHash}");
             _dbContext.TrackUserRelations.Add(track);
             await _dbContext.SaveChangesAsync();
-            return JsonConvert.SerializeObject(new { message = "Track was added to User", status = true});
+            return JsonConvert.SerializeObject(new { message = $"Track was added to User: {track.UserHash}", status = true});
         }
 
         [Route("api/user/addplaylist")]
@@ -46,7 +46,7 @@ namespace MusicHunterServer.Controllers
             _logger.LogInformation($"[PlaylistToUser controller request] = playlistHash: {playlist.PlaylistHash}  userHash: {playlist.UserHash}");
             _dbContext.PlaylistUserRelations.Add(playlist);
             await _dbContext.SaveChangesAsync();
-            return JsonConvert.SerializeObject(new { message = "Track was added to User", status = true });
+            return JsonConvert.SerializeObject(new { message = $"Playlist was added to User: {playlist.UserHash}", status = true });
         }
         [Route("api/user/getTracks")]
         [HttpGet]
@@ -54,29 +54,21 @@ namespace MusicHunterServer.Controllers
         {
             _logger.LogInformation($"Get tracks [userHash  = {userHash}]");
             var tracks = _dbContext.Tracks.FromSqlRaw("select T.Id,T.Artist,T.HashUrl,T.ImageUrl,T.Name,T.OwnerId from TrackUserRelations join Tracks as T on TrackHash = T.HashUrl where UserHash like @userHash", new SqlParameter("@userHash", userHash));
-            
             foreach (var track in tracks)
             {
                 track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
             }
-
-            return JsonConvert.SerializeObject(new { messsage = "Tracks of ", tracks = JsonConvert.SerializeObject(tracks), status = true});
+            return JsonConvert.SerializeObject(new { messsage = $"TRACKS RECEIVED FOR {userHash}", tracks = JsonConvert.SerializeObject(tracks), status = true});
         }
 
         [Route("api/user/getPlaylists")]
         [HttpGet]
         public string GetAlbumsOfUser(string userHash)
         {
-
             _logger.LogInformation($"Get playlists [userHash  = {userHash}]");
-            //var tracks = _dbContext.Tracks.FromSqlRaw("select T.Id,T.Artist,T.HashUrl,T.ImageUrl,T.Name,T.OwnerId from TrackUserRelations join Tracks as T on TrackHash = T.HashUrl where UserHash like @userHash", new SqlParameter("@userHash", userHash));
-
             var playlists = _dbContext.Playlists.FromSqlRaw("select P.Id, P.Hash, P.ImageUrl, P.Name, P.OwnerId,P.Type from PlaylistUserRelations as PP join Playlists as P on PP.PlaylistHash = P.Hash where UserHash like @userHash", new SqlParameter("@userHash", userHash));
-
-            _logger.LogInformation("1 step");
             foreach (var playlist in playlists)
             {
-                _logger.LogInformation("CUR HASH " + playlist.Hash);
                 var tracks = _dbContext.Tracks.FromSqlRaw("select T.Id,T.Artist,T.HashUrl,T.ImageUrl,T.Name,T.OwnerId from PlaylistRelations as PR join Tracks as T on T.HashUrl = PR.TrackHashUrl where PR.PlaylistHash like @playlistHash;", new SqlParameter("@playlistHash", playlist.Hash));
                 playlist.Tracks = tracks.ToList();
                 foreach (var track in playlist.Tracks)
@@ -85,24 +77,14 @@ namespace MusicHunterServer.Controllers
                     track.HashUrl = "https://localhost:5001/music/" + track.HashUrl;
                     track.ImageUrl = "https://localhost:5001/images/" + track.ImageUrl;
                 }
-
-
             }
-
-
-            //List<Playlist> playlists = new List<Playlist>();
-
-            //foreach (var track in tracks)
-            //{
-            //    track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
-            //}
 
             DefaultContractResolver contractResolver = new DefaultContractResolver
             {
                 NamingStrategy = new CamelCaseNamingStrategy()
             };
 
-            return JsonConvert.SerializeObject(new { messsage = "Tracks of ", playlists = JsonConvert.SerializeObject(playlists, new JsonSerializerSettings
+            return JsonConvert.SerializeObject(new { messsage = $"Playlist[GET] RESPONSE USERHASH: {userHash}", playlists = JsonConvert.SerializeObject(playlists, new JsonSerializerSettings
             {
                 ContractResolver = contractResolver,
                 Formatting = Formatting.Indented

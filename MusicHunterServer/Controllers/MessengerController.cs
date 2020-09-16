@@ -28,29 +28,7 @@ namespace MusicHunterServer.Controllers
             _dbContext = dbContext;
         }
         
-        public async Task GetNotification(string message)
-        {
-            _logger.LogError("Getnotification message received = " + message);
-            await this.Clients.All.SendAsync("GetResponse", "Hello my friend asp.net core glad to see you");
-            await this.Clients.All.SendAsync("GetLol", "Hello my friend asp.net core glad to see you");
-
-            //if (UserContainer.getUserById(UserId) == null)
-            //{
-            //    string ar = $"Error, user was not founded. ID={UserId} doesn't exist.";
-            //    await this.Clients.Client(connectionId).SendAsync("GetResponse", ar);
-            //}
-            //else
-            //{
-            //    string sshResponse = UserContainer.getUserById(UserId).SSHRunCommand(sshCommand);
-            //    string ar = $"SSH COMMAND:{sshCommand} FOR USER ID={UserId} was execute.";
-            //    await this.Clients.Client(connectionId).SendAsync("GetResponseCommand", ar, sshResponse);
-            //}
-        }
-        //public async Task SendMessage(Message message)
-        //{
-
-  
-        //}
+        
         public void Connect(string UserHash)
         {
             var userId = Context.ConnectionId;
@@ -66,11 +44,8 @@ namespace MusicHunterServer.Controllers
         }
         public async Task SendMessage(string hashSender,string hashReciver,Message message)
         {
-            //Message message = new Message();
             message.CreatedAt = DateTime.Now;
-            //message.Text = textMessage;
             message.SenderHash = hashSender;
-            _logger.LogInformation("TestMessage.Text = " + message.Text);
             var userReceiver = Users.FirstOrDefault(user => user.Hash == hashReciver);
             if (message.ConversationId == 0)
             {
@@ -79,9 +54,8 @@ namespace MusicHunterServer.Controllers
                 if (conversationId == 0)
                 {
                     _logger.LogWarning("Creating new converstion object ....");
-
                     Conversation newConversation = new Conversation();
-                    newConversation.Title = "Hello";
+                    newConversation.Title = "Conversation";
                     newConversation.IsDuo = true;
                     newConversation.UpdatedAt = DateTime.Now;
                     newConversation.CreatedAt = DateTime.Now;
@@ -117,42 +91,30 @@ namespace MusicHunterServer.Controllers
             {
                 _dbContext.Messages.Add(message);
                 await _dbContext.SaveChangesAsync();
-                _logger.LogWarning("ConversationId was founded in body of request and message was sent!");
+                _logger.LogWarning("ConversationId was found in body of request and message was sent!");
                 await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", message.Text);
-                _logger.LogInformation("Message was send info: |Conversation was founded in received message|");
+                _logger.LogInformation("Message was sent, info: |Conversation was found in received message|");
 
             }
-            //_dbContext.ConversationRelations.FirstOrDefault(item => item.)
 
             if (userReceiver != null)
             {
-                //await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", message);
-                //await Clients.Client(userReceiver.ConnectionId).SendAsync("GetNotification", message);
                 await Clients.Client(userReceiver.ConnectionId).SendAsync("GetMessage", new { Text = message.Text, HashSender = hashSender });
                 _logger.LogWarning("Notification to UserReceiver with connectionId = " + userReceiver.ConnectionId + " was sent");
-                _logger.LogInformation("Message was send info: |Receiver user was Online on Zhakar servers.|");
+                _logger.LogInformation("Message was sent, info: |Receiver user was Online on Zhakar servers.|");
 
             }
 
         }
         public int IsConversationExist(string hash1,string hash2)
         {
-
-            //var conversationList = _dbContext.Participants.GroupBy(item => new { item.ConversationId, item.Hash }).Where(p => p.Key.Hash == hashUser1 || p.Key.Hash == hashUser2).Take(2);
             var conversationList = _dbContext.Participants.FromSqlRaw("select * from Participants where ConversationId in (select O.ConversationId from (select count(T.ConversationID) as Counter, T.ConversationId from (select * from Participants where Hash like @hash1 or Hash like @hash2) as T group by T.ConversationId) as O where O.Counter = 2)",
                 new SqlParameter("@hash1", hash1), new SqlParameter("@hash2", hash2));
             if (conversationList.Count() >= 2)
             {
                 int conversationId = conversationList.ToList<Participant>().ElementAt(0).ConversationId;
-                _logger.LogError("Conversation USERS(" + hash1 + "," + hash2  + ") was founded : CoversationId = " + conversationId);
-
                 return conversationId;
             }
-            _logger.LogError("LIST COUnt = " + conversationList.Count());
-            //if (conversationList.ElementAt(0).ConversationId == conversationList.ElementAt(1).ConversationId)
-            //{
-            //    return conversationList.ElementAt(0).ConversationId;
-            //}
             return 0;
         }
         

@@ -42,8 +42,6 @@ namespace MusicHunterServer.Controllers
             string hashString = "";
             string extension = "";
             long size = files.Sum(f => f.Length);
-            _logger.LogInformation("FILE [TRACK] UPLOAD REQUEST");
-
             foreach (var formFile in files)
             {
                 if (formFile.Length > 0)
@@ -51,7 +49,6 @@ namespace MusicHunterServer.Controllers
                     extension = Path.GetExtension(formFile.FileName);
                     hashString = Utils.Hasher.GetHashString(formFile.FileName + DateTime.Now.ToString());
                     var filePath = Directory.GetCurrentDirectory() + @"\music\" + hashString + extension;
-                    _logger.LogInformation("FILE NAME = " + formFile.FileName);
                     using (var stream = System.IO.File.Create(filePath))
                     {
                         await formFile.CopyToAsync(stream);
@@ -61,20 +58,12 @@ namespace MusicHunterServer.Controllers
                     float [] points = trackHistogram.getValuesInPersent(1);
                     string jsonPoints = JsonConvert.SerializeObject(new { pointArray = points });
                     System.IO.File.WriteAllText(Directory.GetCurrentDirectory() + @"\histograms\" + hashString + ".histogram",jsonPoints);
+                    _logger.LogInformation($"FILE: {formFile.FileName} was uploaded and saved");
+
                 }
             }
-
-
-
-            //Message message = new Message();
-            //message.ConversationId = 12;
-            //message.SenderId = 13;
-            //message.CreatedAt = new DateTime(2015, 7, 20);
-            //dbContext.Messages.Add(message);
             dbContext.SaveChanges();
-            //_logger.LogError("TEST PATH = " + _appEnvironment.WebRootPath);
-            //_logger.LogWarning("UPLOAD PATH: " + Directory.GetCurrentDirectory() + @"\music");
-            return JsonConvert.SerializeObject(new { message = "file was uploaded", hashUrl = hashString + extension, status = true });
+            return JsonConvert.SerializeObject(new { message = "File was uploaded", hashUrl = hashString + extension, status = true });
         }
 
 
@@ -85,7 +74,6 @@ namespace MusicHunterServer.Controllers
         {
             string hashString = "";
             long size = files.Sum(f => f.Length);
-            _logger.LogInformation("FILE [PLAYLIST] UPLOAD REQUEST");
 
             foreach (var formFile in files)
             {
@@ -93,23 +81,15 @@ namespace MusicHunterServer.Controllers
                 {
                     hashString = Utils.Hasher.GetHashString(formFile.FileName + DateTime.Now.ToString());
                     var filePath = Directory.GetCurrentDirectory() + @"\music\" + hashString + Path.GetExtension(formFile.FileName);
-                    _logger.LogInformation("FILE NAME = " + formFile.FileName);
-
                     using (var stream = System.IO.File.Create(filePath))
                     {
                         await formFile.CopyToAsync(stream);
                     }
                 }
             }
-            //Message message = new Message();
-            //message.ConversationId = 12;
-            //message.SenderId = 13;
-            //message.CreatedAt = new DateTime(2015, 7, 20);
-            //dbContext.Messages.Add(message);
+            _logger.LogInformation($"TRACKS WERE UPLOADED AND SAVED [PLAYLIST] HASH: {hashString}");
             dbContext.SaveChanges();
-            //_logger.LogError("TEST PATH = " + _appEnvironment.WebRootPath);
-            //_logger.LogWarning("UPLOAD PATH: " + Directory.GetCurrentDirectory() + @"\music");
-            return JsonConvert.SerializeObject(new { message = "file was uploaded", hash = hashString, status = true });
+            return JsonConvert.SerializeObject(new { message = "File(s) was uploaded", hash = hashString, status = true });
         }
 
         [Route("/upload/image")]
@@ -128,27 +108,15 @@ namespace MusicHunterServer.Controllers
                 {
                     hashString = Utils.Hasher.GetHashString(formFile.FileName + DateTime.Now.ToString());
                     extension = Path.GetExtension(formFile.FileName);
-                    _logger.LogInformation("EXTENSION: " + extension);
-                    _logger.LogInformation("FILE NAME = " + formFile.FileName);
-
                     var filePath = Directory.GetCurrentDirectory() + @"\images\" + hashString + extension;
-
-
                     using (var stream = System.IO.File.Create(filePath))
                     {
                         await formFile.CopyToAsync(stream);
                     }
                 }
             }
-            //Message message = new Message();
-            //message.ConversationId = 12;
-            //message.SenderId = 13;
-            //message.CreatedAt = new DateTime(2015, 7, 20);
-            //dbContext.Messages.Add(message);
             dbContext.SaveChanges();
-            //_logger.LogError("TEST PATH = " + _appEnvironment.WebRootPath);
-            //_logger.LogWarning("UPLOAD PATH: " + Directory.GetCurrentDirectory() + @"\music");
-            return JsonConvert.SerializeObject(new { message = "image file was uploaded", hashUrl = hashString + extension, status = true });
+            return JsonConvert.SerializeObject(new { message = "Image file was uploaded", hashUrl = hashString + extension, status = true });
         }
 
     }

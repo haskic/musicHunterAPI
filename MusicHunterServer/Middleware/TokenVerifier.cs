@@ -53,9 +53,7 @@ namespace MusicHunterServer.Middleware
                     await _next.Invoke(context);
                 }
             }
-            
         }
-
 
         public bool ValidateCurrentToken(string token)
         {
@@ -73,8 +71,6 @@ namespace MusicHunterServer.Middleware
                     ValidateIssuer = false,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = mySecurityKey,
-
-
                 }, out SecurityToken validatedToken);
             }
             catch

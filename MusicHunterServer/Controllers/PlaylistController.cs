@@ -52,7 +52,6 @@ namespace MusicHunterServer.Controllers
         [HttpPost]
         public async Task<string> AddRelation([FromBody] PlaylistRelation relation)
         {
-
             _logger.LogInformation("Add Relation between playlistHash: " + relation.PlaylistHash + " && " + " trackHash: " + relation.TrackHashUrl);
             _dbContext.PlaylistRelations.Add(relation);
             await _dbContext.SaveChangesAsync();

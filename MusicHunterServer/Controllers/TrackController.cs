@@ -27,28 +27,24 @@ namespace MusicHunterServer.Controllers
         [HttpPost]
         public async Task<string> AddTrack([FromBody] Track track)
         {
-            _logger.LogInformation("Add Track REQUEST: " + track.Name);
+            _logger.LogInformation("TRACK CONTROLLER[ADD TRACK REQUEST]: " + track.Name);
             _dbContext.Tracks.Add(track);
             await _dbContext.SaveChangesAsync();
-
             return JsonConvert.SerializeObject( new { message = "Track was saved", status = true});
         }
         [Route("/tracks/add")]
         [HttpPost]
         public async Task<string> AddTracks( IList<Track> tracks)
         {
-             _logger.LogInformation("I'm not die: ");
-
             foreach (var track in tracks)
             {
-                _logger.LogInformation("Add Track REQUEST: " + track.Name);
-                _logger.LogInformation("Image URL of Track = " + track.ImageUrl);
+                _logger.LogInformation("TRACK CONTROLLER[ADD TRACKS REQUEST]: " + track.Name);
                 _dbContext.Tracks.Add(track);
             }
 
             await _dbContext.SaveChangesAsync();
 
-            return JsonConvert.SerializeObject(new { message = "Tracks was saved, number of tracks = ", status = true});
+            return JsonConvert.SerializeObject(new { message = $"Tracks were saved, number of tracks: {tracks.Count}", status = true});
         }
     }
 }

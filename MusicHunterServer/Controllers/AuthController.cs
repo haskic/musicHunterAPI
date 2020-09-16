@@ -46,16 +46,14 @@ namespace MusicHunterServer.Controllers
         [HttpPost]
         public string Login([FromBody] AuthenticateRequest loginRequest)
         {
-            _logger.LogInformation("POST RESPONSE /login");
+            _logger.LogInformation($"LOGIN REQUEST FROM {loginRequest.Email}");
 
             var result = _dbContext.Users.Where(user => user.Email == loginRequest.Email && user.Password == loginRequest.Password).FirstOrDefault();
 
             if (result == null)
             {
-                _logger.LogWarning("Login denied | user was not founded");
                 return JsonConvert.SerializeObject(new { message = "User was not founded", status = false });
             }
-
             string tokenString = _tokenManeger.createToken(loginRequest);
             return JsonConvert.SerializeObject(new { message =  "login successed", token = tokenString, userHash = result.Hash });
 
@@ -70,7 +68,7 @@ namespace MusicHunterServer.Controllers
             user.Hash = Hasher.GetHashString(user.Email + user.CreatedAt.ToString());
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
-            return JsonConvert.SerializeObject(new { message = "Registratinos successed", status = true });
+            return JsonConvert.SerializeObject(new { message = $"Registration {user.Email} successed", status = true });
         }
 
 
@@ -82,7 +80,6 @@ namespace MusicHunterServer.Controllers
             try
             {
                 var result = await GoogleJsonWebSignature.ValidateAsync(token.TokenId);
-                _logger.LogInformation("Google token received with email: " + result.Email);
                 string UserHash = "";
                 var userInDb = _dbContext.Users.Where(user => user.Email == result.Email).FirstOrDefault();
 
@@ -114,15 +111,5 @@ namespace MusicHunterServer.Controllers
 
             }
         }
-
-        [Route("api/testroute")]
-        [HttpPost]
-        public async Task<string> TestRouter()
-        {
-
-
-            return JsonConvert.SerializeObject(new { message = "test success" });
-        }
-
     }
 }
