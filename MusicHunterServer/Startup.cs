@@ -37,8 +37,6 @@ namespace MusicHunterServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-
             var appSettingsSection = Configuration.GetSection("AppSettings");
 
             services.Configure<AppSettings>(appSettingsSection);
@@ -60,26 +58,6 @@ namespace MusicHunterServer
                        .SetIsOriginAllowed((host) => true)
                        .AllowCredentials();
             }));
-            //var key = Encoding.ASCII.GetBytes("zhakarik");
-            //services.AddAuthentication(x =>
-            //{
-            //    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //})
-            //.AddJwtBearer(x =>
-            //{
-            //    x.RequireHttpsMetadata = false;
-            //    x.SaveToken = true;
-            //    x.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(key),
-            //        ValidateIssuer = false,
-            //        ValidateAudience = false
-            //    };
-            //});
-
-
             services.AddSignalR(options =>
             {
                 options.EnableDetailedErrors = true;
@@ -92,15 +70,11 @@ namespace MusicHunterServer
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Program> logger)
         {
             app.UseCors("CorsPolicy");
-            logger.LogWarning("I'm READY");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
             app.UseMiddleware<TokenVerifier>();
-
-            //app.UseWebSockets();
             app.UseHttpsRedirection();
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -115,9 +89,7 @@ namespace MusicHunterServer
                 RequestPath = "/music"
             });
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotificationsController>("/notifications");
