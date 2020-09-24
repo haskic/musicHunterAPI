@@ -63,6 +63,7 @@ namespace MusicHunterServer.Controllers
         [HttpPost]
         public async Task<string> RegistrationUser(User user)
         {
+            this._logger.LogInformation($"Registration request from user: {user.Email}");
             user.CreatedAt = DateTime.Now;
             user.UpdatedAt = DateTime.Now;
             user.Hash = Hasher.GetHashString(user.Email + user.CreatedAt.ToString());
