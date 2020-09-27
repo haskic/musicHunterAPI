@@ -67,7 +67,9 @@ namespace MusicHunterServer.Controllers
         public async Task<string> RegistrationUser(User user)
         {
             this._logger.LogInformation($"Registration request from user: {user.Email}");
-            this._logger.LogInformation($"Nickname: {user.Nickname}");
+            this._logger.LogInformation($"LastName: {user.LastName}");
+            this._logger.LogInformation($"Name: {user.Name}");
+
 
             user.CreatedAt = DateTime.Now;
             user.UpdatedAt = DateTime.Now;
