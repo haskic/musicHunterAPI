@@ -32,5 +32,67 @@ namespace MusicHunterServer.Utils
             var tokenString = handler.WriteToken(secToken);
             return tokenString;
         }
+        public bool ValidateToken(string token)
+        {
+            var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(this.secretKey));
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateActor = false,
+                    ValidateTokenReplay = false,
+                    ValidateIssuer = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = mySecurityKey,
+                }, out SecurityToken validatedToken);
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+
+
+        public bool ValidateToken(string token, out SecurityToken validatedToken)
+        {
+            var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(this.secretKey));
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateActor = false,
+                    ValidateTokenReplay = false,
+                    ValidateIssuer = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = mySecurityKey,
+                }, out validatedToken);
+
+            }
+            catch
+            {
+                validatedToken = null;
+                return false;
+            }
+            return true;
+        }
+
+
+        public string ValidateAndGetEmail(string token)
+        {
+            SecurityToken validatedToken;
+            if (ValidateToken(token, out validatedToken))
+            {
+                string email = ((JwtSecurityToken)validatedToken).Payload["Email"].ToString();
+                return email;
+            }
+            return null;
+        }
     }
 }

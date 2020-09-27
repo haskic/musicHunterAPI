@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MusicHunterServer.Data;
 using MusicHunterServer.Models;
+using MusicHunterServer.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -23,10 +25,20 @@ namespace MusicHunterServer.Controllers
 
         private readonly ILogger<Program> _logger;
         private readonly UserDbContext _dbContext;
-        public UserController(UserDbContext dbContext, ILogger<Program> logger)
+        private readonly TokenManager _tokenManager;
+        private readonly IOptions<AppSettings> _appSettings;
+        private readonly DefaultContractResolver _contractResolver;
+
+        public UserController(UserDbContext dbContext, ILogger<Program> logger, IOptions<AppSettings> appSettings)
         {
             this._dbContext = dbContext;
             this._logger = logger;
+            this._appSettings = appSettings;
+            this._tokenManager = new TokenManager(this._appSettings.Value.Secret);
+            this._contractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
         }
 
         [Route("api/user/addtrack")]
@@ -36,7 +48,7 @@ namespace MusicHunterServer.Controllers
             _logger.LogInformation($"[TrackToUser controller request] = trackHash: {track.TrackHash}  userHash: {track.UserHash}");
             _dbContext.TrackUserRelations.Add(track);
             await _dbContext.SaveChangesAsync();
-            return JsonConvert.SerializeObject(new { message = $"Track was added to User: {track.UserHash}", status = true});
+            return JsonConvert.SerializeObject(new { message = $"Track was added to User: {track.UserHash}", status = true });
         }
 
         [Route("api/user/addplaylist")]
@@ -58,7 +70,7 @@ namespace MusicHunterServer.Controllers
             {
                 track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
             }
-            return JsonConvert.SerializeObject(new { messsage = $"TRACKS RECEIVED FOR {userHash}", tracks = JsonConvert.SerializeObject(tracks), status = true});
+            return JsonConvert.SerializeObject(new { messsage = $"TRACKS RECEIVED FOR {userHash}", tracks = JsonConvert.SerializeObject(tracks), status = true });
         }
 
         [Route("api/user/getPlaylists")]
@@ -79,16 +91,43 @@ namespace MusicHunterServer.Controllers
                 }
             }
 
-            DefaultContractResolver contractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            };
+            
 
-            return JsonConvert.SerializeObject(new { messsage = $"Playlist[GET] RESPONSE USERHASH: {userHash}", playlists = JsonConvert.SerializeObject(playlists, new JsonSerializerSettings
+            return JsonConvert.SerializeObject(new
             {
-                ContractResolver = contractResolver,
+                messsage = $"Playlist[GET] RESPONSE USERHASH: {userHash}",
+                playlists = JsonConvert.SerializeObject(playlists, new JsonSerializerSettings
+                {
+                    ContractResolver = this._contractResolver,
+                    Formatting = Formatting.Indented
+                }),
+                status = true
+            });
+        }
+
+        [Route("api/public/userByToken")]
+        [HttpGet]
+        public string GetUserByToken(string token)
+        {
+            _logger.LogInformation($"[GetUserByToken] request");
+            string email = this._tokenManager.ValidateAndGetEmail(token);
+            if (email == null)
+            {
+                _logger.LogInformation($"[GetUserByToken] - {email} : Invalid token");
+                return JsonConvert.SerializeObject(new { messsage = $"Invalid token", status = false });
+            }
+            var user = _dbContext.Users.Where(user => user.Email == email).FirstOrDefault();
+            if (user == null)
+            {
+                _logger.LogInformation($"User with email {email} was not founded");
+                return JsonConvert.SerializeObject(new { messsage = $"Invalid token, user {email} was not founded", status = false });
+            }
+            return JsonConvert.SerializeObject(new { messsage = $"Success, user was founded", status = true, user = JsonConvert.SerializeObject(user, new JsonSerializerSettings
+            {
+                ContractResolver = this._contractResolver,
                 Formatting = Formatting.Indented
-            }), status = true });
+            })
+            });
         }
     }
 }

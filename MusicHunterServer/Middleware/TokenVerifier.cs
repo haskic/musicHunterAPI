@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MusicHunterServer.Models;
+using MusicHunterServer.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,12 @@ namespace MusicHunterServer.Middleware
         private List<string> WhiteListUrls;
         private readonly RequestDelegate _next;
         private readonly IOptions<AppSettings> _appSettings;
+        private readonly TokenManager _tokenManager;
         public TokenVerifier(RequestDelegate next, IOptions<AppSettings> appSettings)
         {
             this._next = next;
             this._appSettings = appSettings;
+            this._tokenManager = new TokenManager(_appSettings.Value.Secret);
             //Urls white list for token verifier
             this.WhiteListUrls = new List<string>()
             {
@@ -32,21 +35,20 @@ namespace MusicHunterServer.Middleware
                 "/music"
             };
             //---------------------------------------
-
         }
         public async Task InvokeAsync(HttpContext context)
         {
-            if (IsUrlInWhiteList(context)) {
+            if (IsUrlInWhiteList(context))
+            {
                 await _next.Invoke(context);
             }
             else
             {
                 var token = context.Request.Headers["token"];
-                if (!ValidateCurrentToken(token))
+                if (!this._tokenManager.ValidateToken(token))
                 {
                     context.Response.StatusCode = 403;
-                    await context.Response.WriteAsync(JsonConvert.SerializeObject(new { message = "Invalid token" }));
-
+                    await context.Response.WriteAsync(JsonConvert.SerializeObject(new { message = "[Middleware] Invalid token" }));
                 }
                 else
                 {
@@ -55,36 +57,14 @@ namespace MusicHunterServer.Middleware
             }
         }
 
-        public bool ValidateCurrentToken(string token)
-        {
-            var mySecret = _appSettings.Value.Secret;
-            var mySecurityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(mySecret));
-            var tokenHandler = new JwtSecurityTokenHandler();
-            try
-            {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateAudience = false,
-                    ValidateLifetime = false,
-                    ValidateActor = false,
-                    ValidateTokenReplay = false,
-                    ValidateIssuer = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = mySecurityKey,
-                }, out SecurityToken validatedToken);
-            }
-            catch
-            {
-                return false;
-            }
-            return true;
-        }
+
 
         private bool IsUrlInWhiteList(HttpContext context)
         {
             foreach (var url in this.WhiteListUrls)
             {
-                if (context.Request.Path.StartsWithSegments(url)) {
+                if (context.Request.Path.StartsWithSegments(url))
+                {
                     return true;
                 }
             }

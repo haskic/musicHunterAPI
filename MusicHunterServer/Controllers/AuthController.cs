@@ -51,14 +51,36 @@ namespace MusicHunterServer.Controllers
         {
             _logger.LogInformation($"LOGIN REQUEST FROM {loginRequest.Email}");
 
-            var result = _dbContext.Users.Where(user => user.Email == loginRequest.Email && user.Password == loginRequest.Password).FirstOrDefault();
+            var result = _dbContext.Users.Where(user => user.Email == loginRequest.Email).FirstOrDefault();
 
             if (result == null)
             {
-                return JsonConvert.SerializeObject(new { message = "User was not founded", status = false });
+                return JsonConvert.SerializeObject(new { message = "User was not found.", status = false });
             }
-            string tokenString = _tokenManeger.createToken(loginRequest);
-            return JsonConvert.SerializeObject(new { message =  "login successed", token = tokenString, userHash = result.Hash,  });
+            else
+            {
+                if (result.Password == loginRequest.Password)
+                {
+                    string tokenString = _tokenManeger.createToken(loginRequest);
+                    return JsonConvert.SerializeObject(new
+                    {
+                        message = "login successed",
+                        status = true,
+                        token = tokenString,
+                        userHash = result.Hash,
+                        user = JsonConvert.SerializeObject(result, new JsonSerializerSettings
+                        {
+                            ContractResolver = contractResolver,
+                            Formatting = Formatting.Indented
+                        })
+                    });
+                }
+                else
+                {
+                    return JsonConvert.SerializeObject(new { message = "Email or Password is incorrect", status = false });
+                }
+            }
+
 
         }
 
@@ -74,7 +96,7 @@ namespace MusicHunterServer.Controllers
             user.CreatedAt = DateTime.Now;
             user.UpdatedAt = DateTime.Now;
             user.Hash = Hasher.GetHashString(user.Email + user.CreatedAt.ToString());
-            
+
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
             return JsonConvert.SerializeObject(new { message = $"Registration {user.Email} successed", status = true });
