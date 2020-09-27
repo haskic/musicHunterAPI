@@ -21,8 +21,7 @@ using MusicHunterServer.Data;
 using MusicHunterServer.Models;
 using MusicHunterServer.Utils;
 using Newtonsoft.Json;
-
-
+using Newtonsoft.Json.Serialization;
 
 namespace MusicHunterServer.Controllers
 {
@@ -33,13 +32,17 @@ namespace MusicHunterServer.Controllers
         private readonly IOptions<AppSettings> _appSettings;
         private readonly TokenManager _tokenManeger;
         private AppDbContext _dbContext;
-
+        private readonly DefaultContractResolver contractResolver;
         public AuthController(ILogger<Program> logger, IOptions<AppSettings> appSettings, AppDbContext dbContext)
         {
             _logger = logger;
             _appSettings = appSettings;
             this._dbContext = dbContext;
             this._tokenManeger = new TokenManager(appSettings.Value.Secret);
+            this.contractResolver = new DefaultContractResolver
+            {
+                NamingStrategy = new CamelCaseNamingStrategy()
+            };
         }
 
         [Route("/api/public/login")]
@@ -55,7 +58,7 @@ namespace MusicHunterServer.Controllers
                 return JsonConvert.SerializeObject(new { message = "User was not founded", status = false });
             }
             string tokenString = _tokenManeger.createToken(loginRequest);
-            return JsonConvert.SerializeObject(new { message =  "login successed", token = tokenString, userHash = result.Hash });
+            return JsonConvert.SerializeObject(new { message =  "login successed", token = tokenString, userHash = result.Hash,  });
 
         }
 
@@ -64,9 +67,12 @@ namespace MusicHunterServer.Controllers
         public async Task<string> RegistrationUser(User user)
         {
             this._logger.LogInformation($"Registration request from user: {user.Email}");
+            this._logger.LogInformation($"Nickname: {user.Nickname}");
+
             user.CreatedAt = DateTime.Now;
             user.UpdatedAt = DateTime.Now;
             user.Hash = Hasher.GetHashString(user.Email + user.CreatedAt.ToString());
+            
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
             return JsonConvert.SerializeObject(new { message = $"Registration {user.Email} successed", status = true });
