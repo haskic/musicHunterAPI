@@ -69,8 +69,19 @@ namespace MusicHunterServer.Controllers
             foreach (var track in tracks)
             {
                 track.Histogram = System.IO.File.ReadAllText(Directory.GetCurrentDirectory() + @"\histograms\" + Path.GetFileNameWithoutExtension(track.HashUrl) + ".histogram");
+                track.HashUrl = "https://localhost:5001/music/" + track.HashUrl;
+                track.ImageUrl = "https://localhost:5001/images/" + track.ImageUrl;
             }
-            return JsonConvert.SerializeObject(new { messsage = $"TRACKS RECEIVED FOR {userHash}", tracks = JsonConvert.SerializeObject(tracks), status = true });
+            return JsonConvert.SerializeObject(new
+            {
+                messsage = $"TRACKS RECEIVED FOR {userHash}",
+                tracks = JsonConvert.SerializeObject(tracks, new JsonSerializerSettings
+                {
+                    ContractResolver = this._contractResolver,
+                    Formatting = Formatting.Indented
+                }),
+                status = true
+            });
         }
 
         [Route("api/user/getPlaylists")]
@@ -91,7 +102,7 @@ namespace MusicHunterServer.Controllers
                 }
             }
 
-            
+
 
             return JsonConvert.SerializeObject(new
             {
@@ -122,11 +133,15 @@ namespace MusicHunterServer.Controllers
                 _logger.LogInformation($"User with email {email} was not founded");
                 return JsonConvert.SerializeObject(new { messsage = $"Invalid token, user {email} was not founded", status = false });
             }
-            return JsonConvert.SerializeObject(new { messsage = $"Success, user was founded", status = true, user = JsonConvert.SerializeObject(user, new JsonSerializerSettings
+            return JsonConvert.SerializeObject(new
             {
-                ContractResolver = this._contractResolver,
-                Formatting = Formatting.Indented
-            })
+                messsage = $"Success, user was founded",
+                status = true,
+                user = JsonConvert.SerializeObject(user, new JsonSerializerSettings
+                {
+                    ContractResolver = this._contractResolver,
+                    Formatting = Formatting.Indented
+                })
             });
         }
     }
