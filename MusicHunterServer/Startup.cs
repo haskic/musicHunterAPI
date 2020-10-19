@@ -49,6 +49,10 @@ namespace MusicHunterServer
             {
                 config.UseSqlServer(connectionString);
             });
+            services.AddDbContext<SearchDbContext>(config =>
+            {
+                config.UseSqlServer(connectionString);
+            });
 
             services.AddCors(options => options.AddPolicy("CorsPolicy",
             builder =>
