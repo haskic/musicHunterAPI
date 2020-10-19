@@ -16,6 +16,8 @@ namespace MusicHunterServer.Models
         public string ImageUrl { get; set; }
         [NotMapped]
         public string Histogram { get; set; }
+        [NotMapped]
+        public string Type { get; set; }
 
     }
 }
